@@ -2,8 +2,8 @@ package kr.randomkeys;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -19,13 +19,13 @@ public class RandomKeysClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
-            dispatcher.register(ClientCommandManager.literal("randomkeys")
-                .then(ClientCommandManager.literal("shuffle").executes(context -> {
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, buildContext) ->
+            dispatcher.register(ClientCommands.literal("randomkeys")
+                .then(ClientCommands.literal("shuffle").executes(context -> {
                     shuffle(context.getSource());
                     return 1;
                 }))
-                .then(ClientCommandManager.literal("reset").executes(context -> {
+                .then(ClientCommands.literal("reset").executes(context -> {
                     reset(context.getSource());
                     return 1;
                 }))
@@ -36,14 +36,20 @@ public class RandomKeysClient implements ClientModInitializer {
     private static void shuffle(net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource source) {
         KeyMapping[] mappings = Minecraft.getInstance().options.keyMappings;
         if (ORIGINAL.isEmpty()) {
-            for (KeyMapping mapping : mappings) ORIGINAL.put(mapping, mapping.getKey());
+            for (KeyMapping mapping : mappings) {
+                ORIGINAL.put(mapping, InputConstants.getKey(mapping.saveString()));
+            }
         }
 
         List<InputConstants.Key> keys = new ArrayList<>();
-        for (KeyMapping mapping : mappings) keys.add(mapping.getKey());
+        for (KeyMapping mapping : mappings) {
+            keys.add(InputConstants.getKey(mapping.saveString()));
+        }
         Collections.shuffle(keys);
 
-        for (int i = 0; i < mappings.length; i++) mappings[i].setKey(keys.get(i));
+        for (int i = 0; i < mappings.length; i++) {
+            mappings[i].setKey(keys.get(i));
+        }
         KeyMapping.resetMapping();
         source.sendFeedback(Component.literal("[Random Keys] 모든 조작키를 무작위로 섞었습니다!"));
     }
