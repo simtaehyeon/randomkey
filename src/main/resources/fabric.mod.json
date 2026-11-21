@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "id": "randomkeys",
+  "version": "${version}",
+  "name": "Random Keys",
+  "description": "Randomly shuffles Minecraft key bindings.",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["kr.randomkeys.RandomKeysClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.20.1",
+    "minecraft": "26.3",
+    "fabric-api": "*"
+  }
+}
